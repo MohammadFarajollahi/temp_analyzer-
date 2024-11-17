@@ -149,6 +149,8 @@ lv_style_t style_label5;
 lv_style_t style_label6;
 lv_style_t style_label7;
 lv_style_t style_label_sd;
+lv_style_t style_clock;
+lv_style_t style_label_usb;
 lv_obj_t *battery_bg;    // برای بدنه باتری
 lv_obj_t *battery_fill;  // برای نمایش مقدار شارژ
 lv_obj_t *chart;
@@ -169,7 +171,8 @@ lv_obj_t *kb;
 lv_obj_t *button_sd;
 lv_obj_t *label_sd;
 lv_obj_t *button_usb;
-lv_obj_t *label_usb;              // کیبورد مجازی
+lv_obj_t *label_usb;  // کیبورد مجازی
+lv_obj_t *label_time;
 String fileName;                  // متغیر ذخیره نام فایل
 lv_obj_t *btn_confirm;            // دکمه تأیید
 lv_coord_t originalX, originalY;  // ذخیره موقعیت اصلی فیلد ورودی
@@ -185,11 +188,46 @@ int usb_ok = 0;
 int usb_chek_count;
 int usb_timer;
 bool usbConnected = false;
-#define USB_DETECT_PIN 21 // پین متصل به VBUS
+String time_show;
+int min_;
+int sec_;
+int hu_;
+int start_program;
+int stop_program;
+#define USB_DETECT_PIN 21  // پین متصل به VBUS
+File dataFile;
+const char *terminalText;
+String file_name;
+//TIMER
+hw_timer_t *timer = NULL;       // اشاره‌گر به تایمر
+volatile uint32_t seconds = 0;  // شمارنده ثانیه
+
+// تابع وقفه تایمر
+void IRAM_ATTR onTimer() {
+  if (start_program == 1) {
+    ++sec_;
+    if (sec_ > 59) {
+      sec_ = 0;
+      ++min_;
+      if (min_ > 59) {
+        min_ = 0;
+        ++hu_;
+      }
+    }
+  }
+}
+
+
 ////////////////////////////////////////////////////////////
 void setup() {
-  Serial.begin(115200); /* prepare for possible serial debug */
-   pinMode(USB_DETECT_PIN, INPUT);
+  Serial.begin(115200);                         /* prepare for possible serial debug */
+                                                //TIMER
+  timer = timerBegin(0, 80, true);              // تایمر 0، تقسیم‌کننده 80 (1 میکروثانیه)
+  timerAttachInterrupt(timer, &onTimer, true);  // اتصال وقفه
+  timerAlarmWrite(timer, 1000000, true);        // وقفه هر 1,000,000 میکروثانیه (1 ثانیه)
+  timerAlarmEnable(timer);                      // فعال کردن وقفه تایمر
+
+  pinMode(USB_DETECT_PIN, INPUT);
   if (!SD.begin(CS_PIN)) {
     Serial.println("Failed to initialize SD card.");
     //return;
@@ -224,14 +262,7 @@ void setup() {
   indev_drv.type = LV_INDEV_TYPE_POINTER;
   indev_drv.read_cb = my_touchpad_read;
   lv_indev_drv_register(&indev_drv);
-
-  // tc.bind(TC1_CS, &temp1, &SPI);  // Bind a thermocouple CS Pin to a variable, they will update on their own, no need for users to manually read.
-  // tc.bind(TC2_CS, &temp2, &SPI, Thermocouple::Unit::FAHRENHEIT);
-  // // MultiMAX6675::bind returns the index of the Thermocouple object in the array.
-  // // You can save this value to update the unit dynamically.
-  // // Or not, if you already know which thermocouple is in what index.
-  // int tc3_index = tc.bind(TC3_CS, &temp3, &SPI, Thermocouple::Unit::FAHRENHEIT);
-  // tc.setUnit(tc3_index, Thermocouple::Unit::CELCIUS);
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   tft.fillScreen(TFT_BLACK);
   tft.setCursor(10, 10);
@@ -254,12 +285,11 @@ void setup() {
     tft.println(s1);
     sd_ok = 1;
   }
-
   delay(500);
-  tft.fillScreen(TFT_BLACK);
-  // tft.drawJpgFile(SD, "/logo.jpg", 0, 0);
-  tft.pushImage(0, 0, 480, 320, my_image);
-  delay(1000);
+  // tft.fillScreen(TFT_BLACK);
+  // // tft.drawJpgFile(SD, "/logo.jpg", 0, 0);
+  // tft.pushImage(0, 0, 480, 320, my_image);
+  // delay(1000);
 
   create_labels();
   create_battery_shape();  // ایجاد نمایشگر باتری
@@ -267,15 +297,16 @@ void setup() {
   creat_check_box();
   button_create();
   sd_card();
+  timer_();
   charj = 75;
   //show_uart("start");
-
 }
 
 void loop() {
   lv_timer_handler(); /* let the GUI do its work */
   lv_show();
   usb_check();
+  program_config();
   delay(5);
 
   if (Serial.available() > 0) {

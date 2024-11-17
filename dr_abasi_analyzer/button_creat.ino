@@ -1,4 +1,29 @@
+//  size_t freeHeap = heap_caps_get_free_size(MALLOC_CAP_DEFAULT);
+//   size_t largestFreeBlock = heap_caps_get_largest_free_block(MALLOC_CAP_DEFAULT);
+//   size_t totalHeap = heap_caps_get_total_size(MALLOC_CAP_DEFAULT);
+//   size_t usedHeap = totalHeap - freeHeap;
 
+//   // بررسی حافظه PSRAM (در صورت وجود)
+//   size_t freePSRAM = heap_caps_get_free_size(MALLOC_CAP_SPIRAM);
+//   size_t totalPSRAM = heap_caps_get_total_size(MALLOC_CAP_SPIRAM);
+//   size_t usedPSRAM = totalPSRAM - freePSRAM;
+
+//   // چاپ اطلاعات در سریال
+//   Serial.println("========== Memory Info ==========");
+//   Serial.printf("Total Heap: %u bytes\n", totalHeap);
+//   Serial.printf("Used Heap: %u bytes\n", usedHeap);
+//   Serial.printf("Free Heap: %u bytes\n", freeHeap);
+//   Serial.printf("Largest Free Block: %u bytes\n", largestFreeBlock);
+
+//   if (totalPSRAM > 0) {
+//     Serial.printf("Total PSRAM: %u bytes\n", totalPSRAM);
+//     Serial.printf("Used PSRAM: %u bytes\n", usedPSRAM);
+//     Serial.printf("Free PSRAM: %u bytes\n", freePSRAM);
+//   } else {
+//     Serial.println("PSRAM not available");
+//   }
+//lv_obj_del(btn_stop);
+//lv_obj_clean(lv_scr_act());
 void show_uart(String text) {
   String s = text;
   lv_textarea_add_text(terminal, s.c_str());
@@ -6,9 +31,27 @@ void show_uart(String text) {
 }
 
 void event_handler_new(lv_event_t *e) {
-  String s = "create new file";
+  String s = "new project";
   lv_textarea_add_text(terminal, s.c_str());
   lv_textarea_add_text(terminal, "\n");  // Add new line
+
+  //ساخت فایل اکسل جدید
+  terminalText = lv_textarea_get_text(fileNameInput);
+  String ss = terminalText;
+  file_name = "/" + ss + ".csv";
+  dataFile = SD.open(file_name, FILE_WRITE);
+  if (dataFile) {
+    dataFile.println("Time(ms),Temp1,Temp2,Temp3");
+    dataFile.close();
+    s = file_name + " create";
+    lv_textarea_add_text(terminal, s.c_str());
+    lv_textarea_add_text(terminal, "\n");  // Add new line
+  } else {
+    Serial.println("خطا در ایجاد فایل!");
+    String s = "Faild create file";
+    lv_textarea_add_text(terminal, s.c_str());
+    lv_textarea_add_text(terminal, "\n");  // Add new line
+  }
 }
 
 
@@ -24,12 +67,23 @@ void event_handler_start(lv_event_t *e) {
   String s = "Start";
   lv_textarea_add_text(terminal, s.c_str());
   lv_textarea_add_text(terminal, "\n");  // Add new line
+  if (start_program == 0) {
+    start_program = 1;
+    stop_program = 0;
+    hu_ = 0;
+    sec_ = 0;
+    min_ = 0;
+  }
 }
 
 void event_handler_stop(lv_event_t *e) {
   String s = "Stop";
   lv_textarea_add_text(terminal, s.c_str());
   lv_textarea_add_text(terminal, "\n");  // Add new line
+  if (stop_program == 0) {
+    stop_program = 1;
+    start_program = 0;
+  }
 }
 
 void button_create() {
@@ -99,7 +153,7 @@ void button_create() {
   //****************terminal_creat******************
   lv_style_init(&style_label7);
   //lv_style_set_text_color(&style_label7, lv_color_hex(0xFFFFFF));  // رنگ متن لیبل‌ها (سفید)
-  lv_style_set_text_font(&style_label7, &lv_font_unscii_8);        // تنظیم فونت
+  lv_style_set_text_font(&style_label7, &lv_font_unscii_8);  // تنظیم فونت
   terminal = lv_textarea_create(lv_scr_act());
   lv_obj_add_style(terminal, &style_label7, 0);
   lv_obj_set_size(terminal, 170, 110);                  // سایز ترمینال

@@ -25,6 +25,6 @@ void showKeyboard() {
   lv_style_init(&style_label4);
   lv_style_set_text_font(&style_label4, &lv_font_unscii_8);  // تنظیم فونت
   lv_obj_t *label_confirm = lv_label_create(btn_confirm);
-   lv_obj_add_style(label_confirm, &style_label4, 0);
+  lv_obj_add_style(label_confirm, &style_label4, 0);
   lv_label_set_text(label_confirm, "Confirm");
 }

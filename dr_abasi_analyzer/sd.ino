@@ -28,8 +28,13 @@ void sd_card() {
   lv_obj_center(label_sd);
   lv_obj_add_event_cb(button_sd, event_handler_sd, LV_EVENT_CLICKED, NULL);
 
+  lv_style_init(&style_label_usb);
+  lv_style_set_text_font(&style_label_usb, &lv_font_unscii_8);        // تنظیم فونت
+  lv_style_set_bg_color(&style_label_usb, lv_color_hex(0xFFFFFF));    // رنگ پس‌زمینه لیبل‌ها (خاکستری تیره)
+  lv_style_set_text_color(&style_label_usb, lv_color_hex(0x000000));  // رنگ متن لیبل‌ها (سفید)
+
   button_usb = lv_btn_create(lv_scr_act());
-  lv_obj_add_style(button_usb, &style_label_sd, 0);
+  lv_obj_add_style(button_usb, &style_label_usb, 0);
   lv_obj_align(button_usb, LV_ALIGN_TOP_LEFT, 347, 85);  // موقعیت دکمه پاک کردن
   lv_obj_set_size(button_usb, 128, 28);
   // Label for the clear button
