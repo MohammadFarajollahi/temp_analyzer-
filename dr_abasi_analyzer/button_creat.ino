@@ -1,12 +1,12 @@
 
-void show_uart(String text){
+void show_uart(String text) {
   String s = text;
   lv_textarea_add_text(terminal, s.c_str());
   lv_textarea_add_text(terminal, "\n");  // Add new line
 }
 
 void event_handler_new(lv_event_t *e) {
-   String s = "create new file";
+  String s = "create new file";
   lv_textarea_add_text(terminal, s.c_str());
   lv_textarea_add_text(terminal, "\n");  // Add new line
 }
@@ -98,11 +98,11 @@ void button_create() {
 
   //****************terminal_creat******************
   lv_style_init(&style_label7);
-  lv_style_set_text_color(&style_label7, lv_color_hex(0xC5BA10));  // رنگ متن لیبل‌ها (سفید)
+  //lv_style_set_text_color(&style_label7, lv_color_hex(0xFFFFFF));  // رنگ متن لیبل‌ها (سفید)
   lv_style_set_text_font(&style_label7, &lv_font_unscii_8);        // تنظیم فونت
   terminal = lv_textarea_create(lv_scr_act());
-    lv_obj_add_style(terminal, &style_label6, 0);
-  lv_obj_set_size(terminal, 170, 110);                    // سایز ترمینال
-  lv_obj_align(terminal, LV_ALIGN_TOP_LEFT, 280, 200);    // تنظیم موقعیت ترمینال
-  lv_textarea_set_text(terminal, "Log ...\n");  // متن اولیه
+  lv_obj_add_style(terminal, &style_label7, 0);
+  lv_obj_set_size(terminal, 170, 110);                  // سایز ترمینال
+  lv_obj_align(terminal, LV_ALIGN_TOP_LEFT, 280, 200);  // تنظیم موقعیت ترمینال
+  lv_textarea_set_text(terminal, "Log ...\n");          // متن اولیه
 }

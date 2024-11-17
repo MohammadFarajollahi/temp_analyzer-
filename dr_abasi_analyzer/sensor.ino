@@ -10,7 +10,7 @@ void read_sensor() {
     }
 
     if (sensorActive[1] == true) {
-      sensor2 = thermocouple2.readCelsius();
+       sensor2 = thermocouple2.readCelsius();
     } else {
       sensor2 = 0;
     }
@@ -22,6 +22,6 @@ void read_sensor() {
     }
     update_chart();
   }
-  Serial.println(String(sensor1));
+  //Serial.println(String(sensor1));
   update_sensor_labels(label1, label2, label3);
 }
