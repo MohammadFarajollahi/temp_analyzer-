@@ -39,18 +39,27 @@ void event_handler_new(lv_event_t *e) {
   terminalText = lv_textarea_get_text(fileNameInput);
   String ss = terminalText;
   file_name = "/" + ss + ".csv";
-  dataFile = SD.open(file_name, FILE_WRITE);
-  if (dataFile) {
-    dataFile.println("Time(ms),Temp1,Temp2,Temp3");
-    dataFile.close();
-    s = file_name + " create";
+
+  if (SD.exists(file_name)) {
+    Serial.println("File already exists. Overwriting...");
+    s = "The file already exists";
     lv_textarea_add_text(terminal, s.c_str());
     lv_textarea_add_text(terminal, "\n");  // Add new line
   } else {
-    Serial.println("خطا در ایجاد فایل!");
-    String s = "Faild create file";
-    lv_textarea_add_text(terminal, s.c_str());
-    lv_textarea_add_text(terminal, "\n");  // Add new line
+
+    dataFile = SD.open(file_name, FILE_WRITE);
+    if (dataFile) {
+      dataFile.println("Time(ms),Temp1,Temp2,Temp3");
+      dataFile.close();
+      s = file_name + " create";
+      lv_textarea_add_text(terminal, s.c_str());
+      lv_textarea_add_text(terminal, "\n");  // Add new line
+    } else {
+      Serial.println("خطا در ایجاد فایل!");
+      String s = "Faild create file";
+      lv_textarea_add_text(terminal, s.c_str());
+      lv_textarea_add_text(terminal, "\n");  // Add new line
+    }
   }
 }
 

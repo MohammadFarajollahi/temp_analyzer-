@@ -285,6 +285,7 @@ void setup() {
     tft.println(s1);
     sd_ok = 1;
   }
+  usb_ok = 0;
   delay(500);
   // tft.fillScreen(TFT_BLACK);
   // // tft.drawJpgFile(SD, "/logo.jpg", 0, 0);
