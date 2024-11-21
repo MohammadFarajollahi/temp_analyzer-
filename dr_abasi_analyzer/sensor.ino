@@ -1,27 +1,31 @@
 int sensor_read_count;
 void read_sensor() {
   ++sensor_read_count;
-  if (sensor_read_count >= 15) {
+  if (sensor_read_count >= 30) {
     sensor_read_count = 0;
-    if (sensorActive[0] == true) {
-      sensor1 = thermocouple1.readCelsius();
-    } else {
+    // خواندن و نمایش دمای سنسور 1
+    if (isnan(thermocouple1.readCelsius())) {
       sensor1 = 0;
+    } else {
+      sensor1 = thermocouple1.readCelsius();
+      Serial.println(String(thermocouple1.readCelsius()));
     }
 
-    if (sensorActive[1] == true) {
-       sensor2 = thermocouple2.readCelsius();
-    } else {
+    // خواندن و نمایش دمای سنسور 2
+    if (isnan(thermocouple2.readCelsius())) {
       sensor2 = 0;
+    } else {
+      sensor2 = thermocouple2.readCelsius();
     }
 
-    if (sensorActive[2] == true) {
-      sensor3 = thermocouple3.readCelsius();
-    } else {
+    // خواندن و نمایش دمای سنسور 3
+    if (isnan(thermocouple3.readCelsius())) {
       sensor3 = 0;
+    } else {
+      sensor3 = thermocouple3.readCelsius();
     }
-    update_chart();
+    //update_chart();
+    // update_sensor_labels(label1, label2, label3);
   }
-  //Serial.println(String(sensor1));
-  update_sensor_labels(label1, label2, label3);
+  //
 }

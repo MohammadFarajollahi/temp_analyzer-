@@ -1,20 +1,18 @@
 #include "FS.h"
 #include "SD.h"
 #include "SPI.h"
-#define CS_PIN 7  // پایه CS برای ESP32-S3 (می‌تواند بسته به سیم‌کشی تغییر کند)
+#define CS_PIN 32  // پایه CS برای ESP32-S3 (می‌تواند بسته به سیم‌کشی تغییر کند)
 
 //*****sensor****
-#include "pic_show.h"
-#include "max6675.h"
-int thermoDO1 = 40;
-int thermoCS1 = 1;
-int thermoCLK1 = 41;
-int thermoDO2 = 40;
-int thermoCS2 = 2;
-int thermoCLK2 = 41;
-int thermoDO3 = 40;
-int thermoCS3 = 42;
-int thermoCLK3 = 41;
+//#include "pic_show.h"
+#include <max6675.h>
+
+// تعریف پین‌های ارتباطی برای هر سنسور
+int thermoDO1 = 25, thermoCS1 = 26, thermoCLK1 = 33;
+int thermoDO2 = 25, thermoCS2 = 27, thermoCLK2 = 33;
+int thermoDO3 = 25, thermoCS3 = 14, thermoCLK3 = 33;
+
+// ایجاد اشیاء برای هر سنسور
 MAX6675 thermocouple1(thermoCLK1, thermoCS1, thermoDO1);
 MAX6675 thermocouple2(thermoCLK2, thermoCS2, thermoDO2);
 MAX6675 thermocouple3(thermoCLK3, thermoCS3, thermoDO3);
@@ -25,8 +23,8 @@ MAX6675 thermocouple3(thermoCLK3, thermoCS3, thermoDO3);
 #include <LovyanGFX.hpp>
 //#include "my_font.h"
 class LGFX : public lgfx::LGFX_Device {
-  //lgfx::Panel_ILI9488 _panel_instance;
-  lgfx::Panel_ILI9486 _panel_instance;
+  lgfx::Panel_ILI9488 _panel_instance;
+  //lgfx::Panel_ILI9486 _panel_instance;
   lgfx::Light_PWM _light_instance;
   lgfx::Bus_SPI _bus_instance;
   lgfx::Touch_XPT2046 _touch_instance;
@@ -37,7 +35,7 @@ public:
       auto cfg = _bus_instance.config();  // バス設定用の構造体を取得します。
 
       // SPIバスの設定
-      cfg.spi_host = SPI2_HOST;  // 使用するSPIを選択  ESP32-S2,C3 : SPI2_HOST or SPI3_HOST / ESP32 : VSPI_HOST or HSPI_HOST
+      cfg.spi_host = VSPI_HOST;  // 使用するSPIを選択  ESP32-S2,C3 : SPI2_HOST or SPI3_HOST / ESP32 : VSPI_HOST or HSPI_HOST
       // ※ ESP-IDFバージョンアップに伴い、VSPI_HOST , HSPI_HOSTの記述は非推奨になるため、エラーが出る場合は代わりにSPI2_HOST , SPI3_HOSTを使用してください。
       cfg.spi_mode = 0;                   // SPI通信モードを設定 (0 ~ 3)
       cfg.freq_write = 40000000;          // 送信時のSPIクロック (最大80MHz, 80MHzを整数で割った値に丸められます)
@@ -46,17 +44,17 @@ public:
       cfg.use_lock = true;                // トランザクションロックを使用する場合はtrueを設定
       cfg.dma_channel = SPI_DMA_CH_AUTO;  // 使用するDMAチャンネルを設定 (0=DMA不使用 / 1=1ch / 2=ch / SPI_DMA_CH_AUTO=自動設定)
       // ※ ESP-IDFバージョンアップに伴い、DMAチャンネルはSPI_DMA_CH_AUTO(自動設定)が推奨になりました。1ch,2chの指定は非推奨になります。
-      cfg.pin_sclk = 12;                       // SPIのSCLKピン番号を設定
-      cfg.pin_mosi = 11;                       // SPIのMOSIピン番号を設定
-      cfg.pin_miso = 13;                       // SPIのMISOピン番号を設定 (-1 = disable)
-      cfg.pin_dc = 6;                          // SPIのD/Cピン番号を設定  (-1 = disable)
+      cfg.pin_sclk = 18;                       // SPIのSCLKピン番号を設定
+      cfg.pin_mosi = 23;                       // SPIのMOSIピン番号を設定
+      cfg.pin_miso = 19;                       // SPIのMISOピン番号を設定 (-1 = disable)
+      cfg.pin_dc = 2;                          // SPIのD/Cピン番号を設定  (-1 = disable)
       _bus_instance.config(cfg);               // 設定値をバスに反映します。
       _panel_instance.setBus(&_bus_instance);  // バスをパネルにセットします。
     }
 
     {  // 表示パネル制御の設定を行います。
       auto cfg = _panel_instance.config();
-      cfg.pin_cs = 4;     // CS
+      cfg.pin_cs = 4;    // CS
       cfg.pin_rst = -1;   // RST
       cfg.pin_busy = -1;  // BUSY
       cfg.panel_width = 320;
@@ -85,12 +83,12 @@ public:
       cfg.pin_int = -1;
       cfg.bus_shared = true;
       cfg.offset_rotation = 0;
-      cfg.spi_host = SPI2_HOST;
+      cfg.spi_host = VSPI_HOST;
       cfg.freq = 1000000;
-      cfg.pin_sclk = 12;  // SCLK
-      cfg.pin_mosi = 11;  // MOSI
-      cfg.pin_miso = 13;  // MISO
-      cfg.pin_cs = 5;     //   CS
+      cfg.pin_sclk = 18;  // SCLK
+      cfg.pin_mosi = 23;  // MOSI
+      cfg.pin_miso = 19;  // MISO
+      cfg.pin_cs = 16;     //   CS
       _touch_instance.config(cfg);
       _panel_instance.setTouch(&_touch_instance);
     }
@@ -194,38 +192,49 @@ int sec_;
 int hu_;
 int start_program;
 int stop_program;
-#define USB_DETECT_PIN 21  // پین متصل به VBUS
+#define USB_DETECT_PIN 39  // پین متصل به VBUS
 File dataFile;
 const char *terminalText;
 String file_name;
 //TIMER
-hw_timer_t *timer = NULL;       // اشاره‌گر به تایمر
-volatile uint32_t seconds = 0;  // شمارنده ثانیه
+// #include "driver/timer.h"  // برای کار با تایمرهای سخت‌افزاری
 
-// تابع وقفه تایمر
-void IRAM_ATTR onTimer() {
-  if (start_program == 1) {
-    ++sec_;
-    if (sec_ > 59) {
-      sec_ = 0;
-      ++min_;
-      if (min_ > 59) {
-        min_ = 0;
-        ++hu_;
-      }
-    }
-  }
-}
+// // تابع وقفه تایمر
+// void IRAM_ATTR onTimer(void *param) {
+//   if (start_program == 1) {
+//     ++sec_;
+//     if (sec_ > 59) {
+//       sec_ = 0;
+//       ++min_;
+//       if (min_ > 59) {
+//         min_ = 0;
+//         ++hu_;
+//       }
+//     }
+//   }
+// }
 
 
 ////////////////////////////////////////////////////////////
 void setup() {
-  Serial.begin(115200);                         /* prepare for possible serial debug */
-                                                //TIMER
-  timer = timerBegin(0, 80, true);              // تایمر 0، تقسیم‌کننده 80 (1 میکروثانیه)
-  timerAttachInterrupt(timer, &onTimer, true);  // اتصال وقفه
-  timerAlarmWrite(timer, 1000000, true);        // وقفه هر 1,000,000 میکروثانیه (1 ثانیه)
-  timerAlarmEnable(timer);                      // فعال کردن وقفه تایمر
+  Serial.begin(115200); /* prepare for possible serial debug */
+  Serial.println("start...");
+                        //TIMER
+  // timer_config_t config = {
+  //   .alarm_en = TIMER_ALARM_EN,
+  //   .counter_en = TIMER_PAUSE,
+  //   .intr_type = TIMER_INTR_LEVEL,
+  //   .counter_dir = TIMER_COUNT_UP,
+  //   .auto_reload = TIMER_AUTORELOAD_EN, // مقدار صحیح
+  //   .divider = 8000 // تقسیم‌کننده فرکانس
+  // };
+
+  // timer_init(TIMER_GROUP_0, TIMER_0, &config);
+  // timer_set_counter_value(TIMER_GROUP_0, TIMER_0, 0); // مقدار اولیه تایمر
+  // timer_set_alarm_value(TIMER_GROUP_0, TIMER_0, 1000); // 1 ثانیه
+  // timer_enable_intr(TIMER_GROUP_0, TIMER_0); // فعال‌سازی وقفه
+  // timer_isr_register(TIMER_GROUP_0, TIMER_0, onTimer, NULL, ESP_INTR_FLAG_IRAM, NULL); // ثبت وقفه
+  // timer_start(TIMER_GROUP_0, TIMER_0); // شروع تایمر
 
   pinMode(USB_DETECT_PIN, INPUT);
   if (!SD.begin(CS_PIN)) {
@@ -295,7 +304,6 @@ void setup() {
   create_labels();
   create_battery_shape();  // ایجاد نمایشگر باتری
   create_battery_chart();  // chart
-  creat_check_box();
   button_create();
   sd_card();
   timer_();
@@ -310,11 +318,11 @@ void loop() {
   program_config();
   delay(5);
 
-  if (Serial.available() > 0) {
-    String input = Serial.readStringUntil('\n');  // Read input until newline
+  // if (Serial.available() > 0) {
+  //   String input = Serial.readStringUntil('\n');  // Read input until newline
 
-    // Update the terminal with the new text
-    lv_textarea_add_text(terminal, input.c_str());
-    lv_textarea_add_text(terminal, "\n");  // Add new line
-  }
+  //   // Update the terminal with the new text
+  //   lv_textarea_add_text(terminal, input.c_str());
+  //   lv_textarea_add_text(terminal, "\n");  // Add new line
+  // }
 }
