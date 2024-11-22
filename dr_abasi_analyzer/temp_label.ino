@@ -6,44 +6,70 @@ void create_labels() {
   // تنظیم رنگ پس‌زمینه صفحه اصلی به مشکی
   lv_obj_set_style_bg_color(lv_scr_act(), lv_color_hex(0x000000), 0);
 
-  // تعریف استایل برای لیبل‌ها
-  lv_style_init(&style_label);
-  lv_style_set_border_color(&style_label, lv_color_hex(0x4D55F5));  // رنگ کادر (آبی)
-  lv_style_set_border_width(&style_label, 2);                       // ضخامت کادر
-  lv_style_set_radius(&style_label, 8);                             // شعاع گوشه‌ها
-  lv_style_set_bg_color(&style_label, lv_color_hex(0x000000));      // رنگ پس‌زمینه لیبل‌ها (خاکستری تیره)
-  lv_style_set_text_color(&style_label, lv_color_hex(0xFFFFFF));    // رنگ متن لیبل‌ها (سفید)
-  lv_style_set_pad_all(&style_label, 5);                            // فاصله داخلی (پدینگ)
-  lv_style_set_text_font(&style_label, &lv_font_unscii_16);         // تنظیم فونت
-                                                                    //
-  // ایجاد و اعمال استایل به لیبل سنسور 1
-  label1 = lv_label_create(lv_scr_act());
-  lv_obj_add_style(label1, &style_label, 0);
-  lv_label_set_text(label1, "Sensor1:  -- C");
-  lv_obj_align(label1, LV_ALIGN_TOP_LEFT, 39, 0);
+  // // تعریف استایل برای لیبل‌ها
+  // lv_style_init(&style_label);
+  // lv_style_set_border_color(&style_label, lv_color_hex(0x4D55F5));  // رنگ کادر (آبی)
+  // lv_style_set_border_width(&style_label, 2);                       // ضخامت کادر
+  // lv_style_set_radius(&style_label, 8);                             // شعاع گوشه‌ها
+  // lv_style_set_bg_color(&style_label, lv_color_hex(0x000000));      // رنگ پس‌زمینه لیبل‌ها (خاکستری تیره)
+  // lv_style_set_text_color(&style_label, lv_color_hex(0xFFFFFF));    // رنگ متن لیبل‌ها (سفید)
+  // lv_style_set_pad_all(&style_label, 5);                            // فاصله داخلی (پدینگ)
+  // lv_style_set_text_font(&style_label, &lv_font_unscii_16);         // تنظیم فونت
+  //                                                                   //
+  // // ایجاد و اعمال استایل به لیبل سنسور 1
+  // label1 = lv_label_create(lv_scr_act());
+  // lv_obj_add_style(label1, &style_label, 0);
+  // lv_label_set_text(label1, "Sensor1:  -- C");
+  // lv_obj_align(label1, LV_ALIGN_TOP_LEFT, 39, 0);
 
-  // ایجاد و اعمال استایل به لیبل سنسور 2
-  label2 = lv_label_create(lv_scr_act());
-  lv_obj_add_style(label2, &style_label, 0);
-  lv_label_set_text(label2, "Sensor2:   -- C");
-  lv_obj_align(label2, LV_ALIGN_TOP_LEFT, 39, 40);
+  // // ایجاد و اعمال استایل به لیبل سنسور 2
+  // label2 = lv_label_create(lv_scr_act());
+  // lv_obj_add_style(label2, &style_label, 0);
+  // lv_label_set_text(label2, "Sensor2:   -- C");
+  // lv_obj_align(label2, LV_ALIGN_TOP_LEFT, 39, 40);
 
-  // ایجاد و اعمال استایل به لیبل سنسور 3
-  label3 = lv_label_create(lv_scr_act());
-  lv_obj_add_style(label3, &style_label, 0);
-  lv_label_set_text(label3, "Sensor3:   -- C");
-  lv_obj_align(label3, LV_ALIGN_TOP_LEFT, 39, 80);
+  // // ایجاد و اعمال استایل به لیبل سنسور 3
+  // label3 = lv_label_create(lv_scr_act());
+  // lv_obj_add_style(label3, &style_label, 0);
+  // lv_label_set_text(label3, "Sensor3:   -- C");
+  // lv_obj_align(label3, LV_ALIGN_TOP_LEFT, 39, 80);
 
   // ایجاد خط در صفحه فعال
   lv_obj_t *line = lv_line_create(lv_scr_act());
   static lv_point_t line_points[2];                              // نقاط خط
-  line_points[0].x = 480;                                         // مختصات شروع
-  line_points[0].y = 0;                                        // مختصات شروع
-  line_points[1].x = 480;                                        // مختصات پایان
-  line_points[1].y = 318;                                        // مختصات پایان
+  line_points[0].x = 429;                                         // مختصات شروع
+  line_points[0].y = 15;                                        // مختصات شروع
+  line_points[1].x = 429;                                        // مختصات پایان
+  line_points[1].y = 29;                                        // مختصات پایان
   lv_line_set_points(line, line_points, 2);                      // تنظیم نقاط خط
   lv_obj_set_style_line_color(line, lv_color_hex(0xFFFFFFFF), 0);  // رنگ خط
-  lv_obj_set_style_line_width(line, 2, 0);                       // ضخامت خط
+  lv_obj_set_style_line_width(line, 1, 0);                       // ضخامت خط
+  // تنظیمات برچسب‌ها برای هر سنسور
+  lv_style_init(&style_label2);
+  lv_style_set_bg_color(&style_label2, lv_color_hex(0x000000));    // رنگ پس‌زمینه لیبل‌ها (خاکستری تیره)
+  lv_style_set_text_color(&style_label2, lv_color_hex(0xFFFFFF));  // رنگ متن لیبل‌ها (سفید)
+  lv_style_set_text_font(&style_label2, &lv_font_unscii_8);        // تنظیم فونت
+
+  label1 = lv_label_create(lv_scr_act());
+  lv_obj_add_style(label1, &style_label2, 0);
+  lv_label_set_text(label1, "S1:");
+  //lv_obj_set_style_text_color(label1, lv_palette_main(LV_PALETTE_RED), 0);
+  lv_obj_set_style_text_color(label1, lv_color_hex(0xFF5733), 0);
+  lv_obj_align(label1, LV_ALIGN_TOP_LEFT, 10, 310);
+
+  label2 = lv_label_create(lv_scr_act());
+  lv_obj_add_style(label2, &style_label2, 0);
+  lv_label_set_text(label2, "S2:");
+  //(label2, lv_palette_main(LV_PALETTE_GREEN), 0);
+  lv_obj_set_style_text_color(label2, lv_color_hex(0x33FF57), 0);
+  lv_obj_align(label2, LV_ALIGN_TOP_LEFT, 180, 310);
+
+  label3 = lv_label_create(lv_scr_act());
+  lv_obj_add_style(label3, &style_label2, 0);
+  lv_label_set_text(label3, "S3:");
+  //lv_obj_set_style_text_color(label3, lv_palette_main(LV_PALETTE_BLUE), 0);
+  lv_obj_set_style_text_color(label3, lv_color_hex(0x3357FF), 0);
+  lv_obj_align(label3, LV_ALIGN_TOP_LEFT, 350, 310);
 }
 
 void update_sensor_labels(lv_obj_t *label1, lv_obj_t *label2, lv_obj_t *label3) {

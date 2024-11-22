@@ -1,10 +1,10 @@
 
 
-void create_battery_chart() {
+void create_chart() {
   // ایجاد نمودار
   chart = lv_chart_create(lv_scr_act());
-  lv_obj_set_size(chart, 479, 290);
-  lv_obj_align(chart, LV_ALIGN_TOP_LEFT, 500, 1);
+  lv_obj_set_size(chart, 473, 190);
+  lv_obj_align(chart, LV_ALIGN_TOP_LEFT, 1, 110);
   lv_chart_set_type(chart, LV_CHART_TYPE_LINE);
 
   // تنظیمات ظاهری نمودار
@@ -22,33 +22,6 @@ void create_battery_chart() {
   ser1 = lv_chart_add_series(chart, lv_color_hex(0xFF5733), LV_CHART_AXIS_PRIMARY_Y);  // رنگ نارنجی
   ser2 = lv_chart_add_series(chart, lv_color_hex(0x33FF57), LV_CHART_AXIS_PRIMARY_Y);  // رنگ سبز
   ser3 = lv_chart_add_series(chart, lv_color_hex(0x3357FF), LV_CHART_AXIS_PRIMARY_Y);  // رنگ آبی
-
-  // تنظیمات برچسب‌ها برای هر سنسور
-  lv_style_init(&style_label2);
-  lv_style_set_bg_color(&style_label2, lv_color_hex(0x000000));    // رنگ پس‌زمینه لیبل‌ها (خاکستری تیره)
-  lv_style_set_text_color(&style_label2, lv_color_hex(0xFFFFFF));  // رنگ متن لیبل‌ها (سفید)
-  lv_style_set_text_font(&style_label2, &lv_font_unscii_8);        // تنظیم فونت
-
-  lv_obj_t *label1 = lv_label_create(lv_scr_act());
-  lv_obj_add_style(label1, &style_label2, 0);
-  lv_label_set_text(label1, "Sensor1(RED)");
-  //lv_obj_set_style_text_color(label1, lv_palette_main(LV_PALETTE_RED), 0);
-  lv_obj_set_style_text_color(label1, lv_color_hex(0xFF5733), 0);
-  lv_obj_align(label1, LV_ALIGN_TOP_LEFT, 510, 300);
-
-  lv_obj_t *label2 = lv_label_create(lv_scr_act());
-  lv_obj_add_style(label2, &style_label2, 0);
-  lv_label_set_text(label2, "Sensor2(GREEN)");
-  //(label2, lv_palette_main(LV_PALETTE_GREEN), 0);
-  lv_obj_set_style_text_color(label2, lv_color_hex(0x33FF57), 0);
-  lv_obj_align(label2, LV_ALIGN_TOP_LEFT, 680, 300);
-
-  lv_obj_t *label3 = lv_label_create(lv_scr_act());
-  lv_obj_add_style(label3, &style_label2, 0);
-  lv_label_set_text(label3, "Sensor3(BLUE)");
-  //lv_obj_set_style_text_color(label3, lv_palette_main(LV_PALETTE_BLUE), 0);
-  lv_obj_set_style_text_color(label3, lv_color_hex(0x3357FF), 0);
-  lv_obj_align(label3, LV_ALIGN_TOP_LEFT, 840, 300);
 }
 
 
@@ -56,6 +29,14 @@ void update_chart() {
   float temp1 = sensor1;
   float temp2 = sensor2;
   float temp3 = sensor3;
+
+  // Serial.print("s1:");
+  // Serial.print(temp1);
+  // Serial.print("/s2:");
+  // Serial.print(temp2);
+  // Serial.print("/s3:");
+  // Serial.println(temp3);
+
 
   // float temp1 = sensorActive[0] ? sensor1 : 0;
   // float temp2 = sensorActive[1] ? sensor2 : 0;
@@ -75,7 +56,7 @@ void update_chart() {
   // تنظیم محدوده محور Y
   float maxTemp = max(max(temp1, temp2), temp3);
   float minTemp = min(min(temp1, temp2), temp3);
-  lv_chart_set_range(chart, LV_CHART_AXIS_PRIMARY_Y,0, maxTemp + 50);
+  lv_chart_set_range(chart, LV_CHART_AXIS_PRIMARY_Y, 0, maxTemp + 50);
 
 
   // اضافه کردن دماها به نمودار

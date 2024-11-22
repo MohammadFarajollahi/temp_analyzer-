@@ -54,7 +54,7 @@ public:
 
     {  // 表示パネル制御の設定を行います。
       auto cfg = _panel_instance.config();
-      cfg.pin_cs = 4;    // CS
+      cfg.pin_cs = 4;     // CS
       cfg.pin_rst = -1;   // RST
       cfg.pin_busy = -1;  // BUSY
       cfg.panel_width = 320;
@@ -88,7 +88,7 @@ public:
       cfg.pin_sclk = 18;  // SCLK
       cfg.pin_mosi = 23;  // MOSI
       cfg.pin_miso = 19;  // MISO
-      cfg.pin_cs = 16;     //   CS
+      cfg.pin_cs = 16;    //   CS
       _touch_instance.config(cfg);
       _panel_instance.setTouch(&_touch_instance);
     }
@@ -148,6 +148,7 @@ lv_style_t style_label6;
 lv_style_t style_label7;
 lv_style_t style_label_sd;
 lv_style_t style_clock;
+lv_style_t style_sample;
 lv_style_t style_label_usb;
 lv_obj_t *battery_bg;    // برای بدنه باتری
 lv_obj_t *battery_fill;  // برای نمایش مقدار شارژ
@@ -162,19 +163,27 @@ lv_obj_t *btn_start;
 lv_obj_t *label_stop;
 lv_obj_t *btn_stop;
 lv_obj_t *label_save;
+lv_obj_t *label_open_file;
 lv_obj_t *btn_save;
+lv_obj_t *btn_open_file;
 lv_obj_t *fileNameInput;  // ورودی نام فایل
 lv_obj_t *btn_keyboard;   // دکمه کیبورد
 lv_obj_t *kb;
 lv_obj_t *button_sd;
 lv_obj_t *label_sd;
 lv_obj_t *button_usb;
+lv_obj_t *btn_exit;
 lv_obj_t *label_usb;  // کیبورد مجازی
 lv_obj_t *label_time;
+lv_obj_t *list;
+lv_obj_t *spinner;
+lv_obj_t *label_sample;
+
 String fileName;                  // متغیر ذخیره نام فایل
 lv_obj_t *btn_confirm;            // دکمه تأیید
 lv_coord_t originalX, originalY;  // ذخیره موقعیت اصلی فیلد ورودی
 lv_obj_t *terminal;
+String FILE_NAME;
 bool sensorActive[3] = { false, false, false };  // فرض کنید که سه سنسور داریم
 int charj;
 
@@ -192,51 +201,56 @@ int sec_;
 int hu_;
 int start_program;
 int stop_program;
-#define USB_DETECT_PIN 39  // پین متصل به VBUS
+#define USB_DETECT_PIN 5  // پین متصل به VBUS
 File dataFile;
 const char *terminalText;
 String file_name;
 //TIMER
-// #include "driver/timer.h"  // برای کار با تایمرهای سخت‌افزاری
+hw_timer_t *timer = NULL;       // اشاره‌گر به تایمر
+volatile uint32_t seconds = 0;  // شمارنده ثانیه
 
-// // تابع وقفه تایمر
-// void IRAM_ATTR onTimer(void *param) {
-//   if (start_program == 1) {
-//     ++sec_;
-//     if (sec_ > 59) {
-//       sec_ = 0;
-//       ++min_;
-//       if (min_ > 59) {
-//         min_ = 0;
-//         ++hu_;
-//       }
-//     }
-//   }
-// }
+// تابع وقفه تایمر
+void IRAM_ATTR onTimer() {
+  if (start_program == 1) {
+    ++sec_;
+    if (sec_ > 59) {
+      sec_ = 0;
+      ++min_;
+      if (min_ > 59) {
+        min_ = 0;
+        ++hu_;
+      }
+    }
+  }
+}
 
+#define BUFFER_SIZE 1024  // سایز بافر
+char buffer[BUFFER_SIZE];
+size_t bufferIndex = 0;
+int stop_count;
+int show_chart;
+static char selected_item[64];  // بافر برای ذخیره آیتم انتخاب شده
+int sample_time;
 
 ////////////////////////////////////////////////////////////
 void setup() {
   Serial.begin(115200); /* prepare for possible serial debug */
   Serial.println("start...");
-                        //TIMER
-  // timer_config_t config = {
-  //   .alarm_en = TIMER_ALARM_EN,
-  //   .counter_en = TIMER_PAUSE,
-  //   .intr_type = TIMER_INTR_LEVEL,
-  //   .counter_dir = TIMER_COUNT_UP,
-  //   .auto_reload = TIMER_AUTORELOAD_EN, // مقدار صحیح
-  //   .divider = 8000 // تقسیم‌کننده فرکانس
-  // };
-
-  // timer_init(TIMER_GROUP_0, TIMER_0, &config);
-  // timer_set_counter_value(TIMER_GROUP_0, TIMER_0, 0); // مقدار اولیه تایمر
-  // timer_set_alarm_value(TIMER_GROUP_0, TIMER_0, 1000); // 1 ثانیه
-  // timer_enable_intr(TIMER_GROUP_0, TIMER_0); // فعال‌سازی وقفه
-  // timer_isr_register(TIMER_GROUP_0, TIMER_0, onTimer, NULL, ESP_INTR_FLAG_IRAM, NULL); // ثبت وقفه
-  // timer_start(TIMER_GROUP_0, TIMER_0); // شروع تایمر
+  //TIMER
+  //TIMER
+  timer = timerBegin(0, 80, true);              // تایمر 0، تقسیم‌کننده 80 (1 میکروثانیه)
+  timerAttachInterrupt(timer, &onTimer, true);  // اتصال وقفه
+  timerAlarmWrite(timer, 1000000, true);        // وقفه هر 1,000,000 میکروثانیه (1 ثانیه)
+  timerAlarmEnable(timer);
 
   pinMode(USB_DETECT_PIN, INPUT);
+
+  // if (!SD.begin(CS_PIN, SPI, 40000000)) { // افزایش سرعت SPI
+  //   Serial.println("کارت SD شناسایی نشد!");
+
+  // }
+  // Serial.println("کارت SD آماده است.");
+
   if (!SD.begin(CS_PIN)) {
     Serial.println("Failed to initialize SD card.");
     //return;
@@ -294,28 +308,30 @@ void setup() {
     tft.println(s1);
     sd_ok = 1;
   }
-  usb_ok = 0;
-  delay(500);
-  // tft.fillScreen(TFT_BLACK);
-  // // tft.drawJpgFile(SD, "/logo.jpg", 0, 0);
+  usb_ok = 1;
+  tft.fillScreen(TFT_BLACK);
+  // tft.drawJpgFile(SD, "/logo.jpg", 0, 0);
   // tft.pushImage(0, 0, 480, 320, my_image);
-  // delay(1000);
+ // delay(1000);
 
   create_labels();
   create_battery_shape();  // ایجاد نمایشگر باتری
-  create_battery_chart();  // chart
+  create_chart();          // chart
   button_create();
   sd_card();
   timer_();
+  create_dropdown();
   charj = 75;
   //show_uart("start");
 }
 
 void loop() {
   lv_timer_handler(); /* let the GUI do its work */
-  lv_show();
-  usb_check();
-  program_config();
+  if (show_chart == 0) {
+    lv_show();
+    usb_check();
+    program_config();
+  }
   delay(5);
 
   // if (Serial.available() > 0) {

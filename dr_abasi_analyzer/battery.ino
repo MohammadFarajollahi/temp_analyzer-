@@ -1,5 +1,4 @@
 void create_battery_shape() {
-  lv_obj_set_style_bg_color(lv_scr_act(), lv_color_hex(0x000000), 0);
   // نقاط بدنه باتری
   static lv_point_t battery_points[] = {
     { 55, 10 },
