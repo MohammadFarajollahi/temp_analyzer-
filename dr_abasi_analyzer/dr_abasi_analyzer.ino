@@ -4,18 +4,15 @@
 #define CS_PIN 32  // پایه CS برای ESP32-S3 (می‌تواند بسته به سیم‌کشی تغییر کند)
 
 //*****sensor****
-//#include "pic_show.h"
 #include <max6675.h>
-
-// تعریف پین‌های ارتباطی برای هر سنسور
 int thermoDO1 = 25, thermoCS1 = 26, thermoCLK1 = 33;
 int thermoDO2 = 25, thermoCS2 = 27, thermoCLK2 = 33;
 int thermoDO3 = 25, thermoCS3 = 14, thermoCLK3 = 33;
-
-// ایجاد اشیاء برای هر سنسور
 MAX6675 thermocouple1(thermoCLK1, thermoCS1, thermoDO1);
 MAX6675 thermocouple2(thermoCLK2, thermoCS2, thermoDO2);
 MAX6675 thermocouple3(thermoCLK3, thermoCS3, thermoDO3);
+
+
 
 #include <Arduino.h>
 #include <lvgl.h>
@@ -178,6 +175,7 @@ lv_obj_t *label_time;
 lv_obj_t *list;
 lv_obj_t *spinner;
 lv_obj_t *label_sample;
+lv_obj_t *label_name;
 
 String fileName;                  // متغیر ذخیره نام فایل
 lv_obj_t *btn_confirm;            // دکمه تأیید
@@ -208,6 +206,8 @@ String file_name;
 //TIMER
 hw_timer_t *timer = NULL;       // اشاره‌گر به تایمر
 volatile uint32_t seconds = 0;  // شمارنده ثانیه
+// متغیرهای دما
+float temp_sensor1, temp_sensor2, temp_sensor3;
 
 // تابع وقفه تایمر
 void IRAM_ATTR onTimer() {
@@ -231,7 +231,10 @@ int stop_count;
 int show_chart;
 static char selected_item[64];  // بافر برای ذخیره آیتم انتخاب شده
 int sample_time;
-
+int sensor_read_count;
+int count_ok=50;
+lv_obj_t * led1;
+int led_count;
 ////////////////////////////////////////////////////////////
 void setup() {
   Serial.begin(115200); /* prepare for possible serial debug */
@@ -312,7 +315,7 @@ void setup() {
   tft.fillScreen(TFT_BLACK);
   // tft.drawJpgFile(SD, "/logo.jpg", 0, 0);
   // tft.pushImage(0, 0, 480, 320, my_image);
- // delay(1000);
+  // delay(1000);
 
   create_labels();
   create_battery_shape();  // ایجاد نمایشگر باتری
@@ -321,17 +324,18 @@ void setup() {
   sd_card();
   timer_();
   create_dropdown();
+  lv_example_led_1();
   charj = 75;
-  //show_uart("start");
 }
 
 void loop() {
-  lv_timer_handler(); /* let the GUI do its work */
+
   if (show_chart == 0) {
     lv_show();
     usb_check();
-    program_config();
+  
   }
+  lv_timer_handler(); /* let the GUI do its work */
   delay(5);
 
   // if (Serial.available() > 0) {

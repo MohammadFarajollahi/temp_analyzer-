@@ -5,89 +5,23 @@ char selected_file[64];
 
 // تابع برای بستن لیست
 void close_file_list(lv_event_t *e) {
-  //lv_obj_t *list = lv_event_get_target(e);
   lv_obj_del_async(list);  // حذف لیست به‌صورت غیرهمزمان
 }
 
-// // تابع برای نمایش لیست فایل‌ها
-// void show_file_list(lv_event_t *e) {
-//   // ایجاد لیست
-//   lv_obj_t *list = lv_list_create(lv_scr_act());
-//   lv_obj_set_size(list, 200, 200);
-//   lv_obj_center(list);
-
-//   // دکمه Close در بالای لیست
-//   lv_obj_t *close_btn = lv_list_add_btn(list, LV_SYMBOL_CLOSE, "Close");
-//   lv_obj_add_event_cb(close_btn, close_file_list, LV_EVENT_CLICKED, list);
-
-//   // باز کردن SD کارت
-//   if (!SD.begin()) {
-//     Serial.println("SD card initialization failed!");
-//     return;
-//   }
-
-//   File root = SD.open("/");
-//   if (!root) {
-//     Serial.println("Failed to open directory!");
-//     return;
-//   }
-
-//   // افزودن فایل‌ها به لیست
-//   File file = root.openNextFile();
-//   while (file) {
-//     if (!file.isDirectory()) {
-//       lv_obj_t *btn = lv_list_add_btn(list, LV_SYMBOL_FILE, file.name());
-//       lv_obj_add_event_cb(
-//         btn, [](lv_event_t *e) {
-//           lv_obj_t *btn = lv_event_get_target(e);
-//           lv_obj_t *list = lv_obj_get_parent(btn);  // دریافت شیء لیست
-//           const char *file_name = lv_list_get_btn_text(list, btn);
-
-//           // ذخیره نام فایل در متغیر
-//           strncpy(selected_file, file_name, sizeof(selected_file));
-//           Serial.printf("Selected file: %s\n", selected_file);
-
-//           // بستن لیست
-//           lv_obj_del_async(list);
-//         },
-//         LV_EVENT_CLICKED, NULL);
-//     }
-//     file = root.openNextFile();
-//   }
-
-//   root.close();
-// }
-
-// ایجاد دکمه اصلی
-// void create_main_button() {
-//   lv_obj_t *btn = lv_btn_create(lv_scr_act());
-//   lv_obj_set_size(btn, 120, 50);
-//   lv_obj_align(btn, LV_ALIGN_CENTER, 0, 0);
-
-//   lv_obj_t *label = lv_label_create(btn);
-//   lv_label_set_text(label, "Open Files");
-//   lv_obj_center(label);
-
-//   lv_obj_add_event_cb(btn, show_file_list, LV_EVENT_CLICKED, NULL);
-// }
 void event_handler_open_file(lv_event_t *e) {
   //
   // ایجاد لیست
   list = lv_list_create(lv_scr_act());
   lv_obj_set_size(list, 250, 200);
   lv_obj_center(list);
-
   // دکمه Close در بالای لیست
   lv_obj_t *close_btn = lv_list_add_btn(list, LV_SYMBOL_CLOSE, "Close");
-
   lv_obj_add_event_cb(close_btn, close_file_list, LV_EVENT_CLICKED, list);
-
   // باز کردن SD کارت
   if (!SD.begin()) {
     Serial.println("SD card initialization failed!");
     return;
   }
-
   File root = SD.open("/");
   if (!root) {
     Serial.println("Failed to open directory!");
@@ -185,6 +119,7 @@ void event_handler_start(lv_event_t *e) {
 void event_handler_stop(lv_event_t *e) {
   ss = "Program Stop";
   create_message_box("", ss);
+   lv_led_off(led1);
   if (stop_program == 0) {
     stop_program = 1;
     start_program = 0;
@@ -290,12 +225,18 @@ static void dropdown_event_handler(lv_event_t *e) {
   Serial.print("آیتم انتخاب شده: ");
   Serial.println(selected_item);  // در اینجا از selected_item استفاده می‌شود که نوع آن char[] است
   String ss1 = selected_item;
-  if (ss1 == ".2sec") sample_time = 1;
-  if (ss1 == ".5sec") sample_time = 2;
+  if (ss1 == "250ms") sample_time = 1;
+  if (ss1 == "500ms") sample_time = 2;
   if (ss1 == "1sec") sample_time = 3;
   if (ss1 == "5sec") sample_time = 4;
   if (ss1 == "10sec") sample_time = 5;
   if (ss1 == "20sec") sample_time = 6;
+  if (sample_time == 1) count_ok = 50;
+  if (sample_time == 2) count_ok = 100;
+  if (sample_time == 3) count_ok = 200;
+  if (sample_time == 4) count_ok = 1000;
+  if (sample_time == 5) count_ok = 2000;
+  if (sample_time == 6) count_ok = 4000;
   Serial.print("sample_time:");
   Serial.println(sample_time);
 }
@@ -303,7 +244,7 @@ static void dropdown_event_handler(lv_event_t *e) {
 void create_dropdown() {
   lv_obj_t *scr = lv_scr_act();
   lv_obj_t *ddlist = lv_dropdown_create(scr);  // فقط یک آرگومان
-  lv_dropdown_set_options(ddlist, ".2sec\n.5sec\n1sec\n5sec\n10sec\n20sec");
+  lv_dropdown_set_options(ddlist, "250ms\n500ms\n1sec\n5sec\n10sec\n20sec");
   lv_obj_align(ddlist, LV_ALIGN_TOP_LEFT, 200, 70);  // موقعیت دکمه پاک کردن
   //lv_obj_set_pos(ddlist, LV_ALIGN_TOP_LEFT, 5, 90);  // موقعیت دکمه پاک کردن // x=50, y=50
   lv_obj_set_size(ddlist, 100, 30);  // عرض=200, ارتفاع=50
@@ -316,8 +257,7 @@ void create_dropdown() {
   lv_style_set_text_color(&style_sample, lv_color_hex(0xFFFFFF));  // رنگ متن لیبل‌ها (سفید)
   label_sample = lv_label_create(lv_scr_act());
   lv_obj_add_style(label_sample, &style_sample, 0);
-  lv_obj_align(label_sample, LV_ALIGN_TOP_LEFT, 206, 60);  
+  lv_obj_align(label_sample, LV_ALIGN_TOP_LEFT, 206, 60);
   //lv_obj_set_size(label_time, 130, 40);
   lv_label_set_text(label_sample, "Sample time");
-
 }

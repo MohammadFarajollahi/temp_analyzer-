@@ -16,7 +16,7 @@ void create_chart() {
   lv_obj_set_style_bg_color(chart, lv_color_hex(0x202020), 0);      // پس‌زمینه تیره
 
   lv_chart_set_range(chart, LV_CHART_AXIS_PRIMARY_Y, 0, 100);
-  lv_chart_set_point_count(chart, 50);  // تعداد نقاط بیشتر در هر سری
+  lv_chart_set_point_count(chart, 40);  // تعداد نقاط بیشتر در هر سری
 
   // ایجاد سری برای هر سنسور با رنگ دلخواه هگز
   ser1 = lv_chart_add_series(chart, lv_color_hex(0xFF5733), LV_CHART_AXIS_PRIMARY_Y);  // رنگ نارنجی
