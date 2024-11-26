@@ -44,18 +44,18 @@ void read_data_from_sd() {
   show_chart = 1;
   file_count = 0;
   File file = SD.open(FILE_NAME.c_str());
-  // if (file) {
-  //   while (file.available()) {
-  //     String line = file.readStringUntil('\n');
-  //     ++file_count;
-  //   }
+  if (file) {
+    while (file.available()) {
+      String line = file.readStringUntil('\n');
+      ++file_count;
+    }
 
-  //   file.close();
-  // } else {
-  //   Serial.println("Failed to open the file");
-  // }
-  // Serial.print("line number:");
-  // Serial.println(file_count);
+    file.close();
+  } else {
+    Serial.println("Failed to open the file");
+  }
+  Serial.print("line number:");
+  Serial.println(file_count);
 
   //دکمه خروج
   btn_exit = lv_btn_create(lv_scr_act());
@@ -114,17 +114,19 @@ void read_data_from_sd() {
         String temp2_str = line.substring(comma2 + 1, line.indexOf(',', comma2 + 1));  // دمای سنسور 2
         String temp3_str = line.substring(line.lastIndexOf(',') + 1);                  // دمای سنسور 3
 
-        // تبدیل رشته به عدد
-        temp_sensor1 = temp1_str.toFloat();
-        temp_sensor2 = temp2_str.toFloat();
-        temp_sensor3 = temp3_str.toFloat();
+        if (temp1_str != "" && temp2_str != "" && temp3_str != "" ) {
+          // تبدیل رشته به عدد
+          temp_sensor1 = temp1_str.toFloat();
+          temp_sensor2 = temp2_str.toFloat();
+          temp_sensor3 = temp3_str.toFloat();
 
 
-        data_count++;  // افزایش تعداد داده‌ها
-        sensor1 = temp_sensor1;
-        sensor2 = temp_sensor2;
-        sensor3 = temp_sensor3;
-        update_chart2();
+          data_count++;  // افزایش تعداد داده‌ها
+          sensor1 = temp_sensor1;
+          sensor2 = temp_sensor2;
+          sensor3 = temp_sensor3;
+          update_chart2();
+        }
       }
     }
     file.close();
@@ -160,7 +162,6 @@ static void slider_y_event_cb(lv_event_t* e) {
 
 
 void update_chart2() {
-  lv_timer_handler(); /* let the GUI do its work */
   float temp1 = sensor1;
   float temp2 = sensor2;
   float temp3 = sensor3;
@@ -199,7 +200,8 @@ void drawChartWithTemperature() {
   lv_obj_set_style_arc_color(chart2, lv_color_hex(0xAAAAAA), 0);     // رنگ خطوط شبکه
   lv_obj_set_style_bg_color(chart2, lv_color_hex(0x202020), 0);      // پس‌زمینه تیره
   lv_chart_set_range(chart2, LV_CHART_AXIS_PRIMARY_Y, 0, 1200);
-  lv_chart_set_point_count(chart2, 3000);  // تعداد نقاط بیشتر در هر سری
+  if(file_count>3000)file_count=3000;
+  lv_chart_set_point_count(chart2, file_count);  // تعداد نقاط بیشتر در هر سری
 
   // ایجاد سری برای هر سنسور با رنگ دلخواه هگز
   ser11 = lv_chart_add_series(chart2, lv_color_hex(0xFF5733), LV_CHART_AXIS_PRIMARY_Y);  // رنگ نارنجی

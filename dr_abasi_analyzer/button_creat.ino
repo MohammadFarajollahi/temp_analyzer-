@@ -105,8 +105,10 @@ void event_handler_save(lv_event_t *e) {
 
 void event_handler_start(lv_event_t *e) {
   stop_count = 0;
+  stop_time = 0;
+  stop_count = 0;
   ss = "Program Start";
-  create_message_box("", ss);
+  //create_message_box("", ss);
   if (start_program == 0) {
     start_program = 1;
     stop_program = 0;
@@ -118,8 +120,10 @@ void event_handler_start(lv_event_t *e) {
 
 void event_handler_stop(lv_event_t *e) {
   ss = "Program Stop";
-  create_message_box("", ss);
-   lv_led_off(led1);
+  stop_time = 0;
+  stop_count = 1;
+  //create_message_box("", ss);
+  lv_led_off(led1);
   if (stop_program == 0) {
     stop_program = 1;
     start_program = 0;

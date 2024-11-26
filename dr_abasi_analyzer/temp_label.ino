@@ -55,21 +55,21 @@ void create_labels() {
   lv_label_set_text(label1, "S1:");
   //lv_obj_set_style_text_color(label1, lv_palette_main(LV_PALETTE_RED), 0);
   lv_obj_set_style_text_color(label1, lv_color_hex(0xFF5733), 0);
-  lv_obj_align(label1, LV_ALIGN_TOP_LEFT, 10, 310);
+  lv_obj_align(label1, LV_ALIGN_TOP_LEFT, 10, 303);
 
   label2 = lv_label_create(lv_scr_act());
   lv_obj_add_style(label2, &style_label2, 0);
   lv_label_set_text(label2, "S2:");
   //(label2, lv_palette_main(LV_PALETTE_GREEN), 0);
   lv_obj_set_style_text_color(label2, lv_color_hex(0x33FF57), 0);
-  lv_obj_align(label2, LV_ALIGN_TOP_LEFT, 180, 310);
+  lv_obj_align(label2, LV_ALIGN_TOP_LEFT, 180, 303);
 
   label3 = lv_label_create(lv_scr_act());
   lv_obj_add_style(label3, &style_label2, 0);
   lv_label_set_text(label3, "S3:");
   //lv_obj_set_style_text_color(label3, lv_palette_main(LV_PALETTE_BLUE), 0);
   lv_obj_set_style_text_color(label3, lv_color_hex(0x3357FF), 0);
-  lv_obj_align(label3, LV_ALIGN_TOP_LEFT, 350, 310);
+  lv_obj_align(label3, LV_ALIGN_TOP_LEFT, 350, 303);
 }
 
 void update_sensor_labels(lv_obj_t *label1, lv_obj_t *label2, lv_obj_t *label3) {

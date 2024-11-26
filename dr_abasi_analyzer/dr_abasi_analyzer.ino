@@ -235,6 +235,7 @@ int sensor_read_count;
 int count_ok=50;
 lv_obj_t * led1;
 int led_count;
+int stop_time;
 ////////////////////////////////////////////////////////////
 void setup() {
   Serial.begin(115200); /* prepare for possible serial debug */
